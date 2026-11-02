@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+# 1. Checkout source code
+- checkout: self
+  displayName: 'Checkout Source Code'
+
+
+# 2. Install Python
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+    addToPath: true
+  displayName: 'Setup Python 3.8'
+
+
+# 3. Upgrade pip
+- script: |
+    python -m pip install --upgrade pip
+  displayName: 'Upgrade pip'
+
+
+# 4. Install project dependencies
+- script: |
+    pip install -r requirement.txt
+  displayName: 'Install Dependencies'
+
+
+# 5. Check Python files
+- script: |
+    python -m py_compile app.py
+    python -m py_compile house.py
+  displayName: 'Validate Python Code'
+
+
+# 6. Start Flask application
+- script: |
+    python app.py &
+    sleep 10
+    echo "Flask application started successfully"
+  displayName: 'Start Flask Application'
+    
