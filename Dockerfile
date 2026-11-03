@@ -1,0 +1,43 @@
+# Use official Python runtime as base image
+FROM python:3.9-slim
+
+# Set working directory in container
+WORKDIR /app
+
+# Copy requirements file
+COPY requirement.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirement.txt
+
+# Copy application files
+COPY app.py .
+COPY house.py .
+COPY house_data.csv .
+COPY model.pkl .
+COPY templates/ templates/
+COPY static/ static/
+
+# Expose port 5000
+EXPOSE 5000
+
+# Set environment variable for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# Run Flask application
+CMD ["python", "app.py"]
+
+FROM python:3.12-slim AS production
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local/lib/python3.12/site-packages
+
+# Copy application
+COPY . .
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
